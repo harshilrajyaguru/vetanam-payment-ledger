@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const rawBaseURL = import.meta.env.VITE_API_BASE_URL || 'https://vetanam-payment-ledger.onrender.com';
+let rawBaseURL = import.meta.env.VITE_API_BASE_URL || 'https://vetanam-payment-ledger.onrender.com';
+rawBaseURL = rawBaseURL.replace(/\/+$/, '');
 const API_BASE_URL = rawBaseURL.endsWith('/api/v1') ? rawBaseURL.slice(0, -7) : rawBaseURL;
 
 const api = axios.create({
