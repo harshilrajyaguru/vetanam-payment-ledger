@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- V shape with integrated flow lines — Vetanam geometric mark -->
+  <rect width="32" height="32" rx="8" fill="#4F46E5"/>
+  <!-- Left leg of V -->
+  <path d="M7 8L13.5 22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <!-- Right leg of V -->
+  <path d="M25 8L13.5 22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <!-- Horizontal accent bar (ledger line) -->
+  <path d="M9 14H15" stroke="rgba(255,255,255,0.45)" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Top accent dot -->
+  <circle cx="25" cy="8" r="2" fill="#818CF8"/>
+</svg>

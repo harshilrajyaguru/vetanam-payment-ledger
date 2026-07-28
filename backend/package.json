@@ -1,0 +1,53 @@
+{
+  "name": "payment-ledger-backend",
+  "version": "1.0.0",
+  "description": "Distributed Payment Ledger API",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "start:worker": "node src/worker.js",
+    "dev": "nodemon src/server.js",
+    "dev:worker": "nodemon src/worker.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=integration",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write \"src/**/*.js\" \"tests/**/*.js\"",
+    "format:check": "prettier --check \"src/**/*.js\" \"tests/**/*.js\""
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+
+    "bullmq": "^5.7.14",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.1",
+    "pino": "^9.1.0",
+    "pino-http": "^10.1.0",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.3.0",
+    "eslint": "^9.3.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.3.0",
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^9.2.0",
+    "nodemon": "^3.1.0",
+
+    "prettier": "^3.2.5",
+    "supertest": "^7.0.0"
+  },
+
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
