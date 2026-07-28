@@ -54,6 +54,9 @@ export class TransactionRepository {
    * @param {import('mongoose').ClientSession} [session]
    */
   async findHistoryByAccountId(accountId, { page = 1, limit = 10 } = {}, session = null) {
+    if (!accountId) {
+      return { transactions: [], total: 0, page, limit, totalPages: 0 };
+    }
     const query = {
       $or: [{ senderAccountId: accountId }, { receiverAccountId: accountId }],
     };
@@ -62,7 +65,7 @@ export class TransactionRepository {
       Transaction.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).session(session),
       Transaction.countDocuments(query).session(session),
     ]);
-    return { transactions, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { transactions, total, page, limit, totalPages: Math.ceil(total / limit) || 0 };
   }
 
   /**

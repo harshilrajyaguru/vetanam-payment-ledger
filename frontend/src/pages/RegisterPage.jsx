@@ -35,10 +35,20 @@ export function RegisterPage() {
       if (res.success) {
         navigate('/dashboard');
       } else {
-        setError(res.error || 'Registration failed.');
+        const errObj = res.error;
+        if (errObj?.details?.issues?.length) {
+          setError(errObj.details.issues.map((i) => i.message).join(' • '));
+        } else {
+          setError(errObj?.message || (typeof errObj === 'string' ? errObj : 'Registration failed.'));
+        }
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || err.message || 'Registration failed.');
+      const errObj = err.response?.data?.error;
+      if (errObj?.details?.issues?.length) {
+        setError(errObj.details.issues.map((i) => i.message).join(' • '));
+      } else {
+        setError(errObj?.message || err.message || 'Registration failed.');
+      }
     } finally {
       setIsLoading(false);
     }

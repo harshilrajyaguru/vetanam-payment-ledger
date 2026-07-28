@@ -278,24 +278,30 @@ export function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {recentTransactions.map((tx) => (
-                  <tr key={tx._id}>
-                    <td>
-                      <code style={{ fontSize: '0.8rem', color: 'var(--brand-indigo)', fontWeight: 600 }}>
-                        #{tx._id.slice(-8).toUpperCase()}
-                      </code>
-                    </td>
-                    <td style={{ fontWeight: 700 }}>
-                      <span className="tx-amount-debit">
-                        {formatMinorUnits(tx.amount, tx.currency)}
-                      </span>
-                    </td>
-                    <td><StatusBadge status={tx.status} /></td>
-                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-                      {new Date(tx.createdAt).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+                {recentTransactions.map((tx) => {
+                  const isDeposit = String(tx.senderAccountId) === String(account?.id || account?._id);
+                  const isReceived = account?.id ? String(tx.receiverAccountId) === String(account.id) && String(tx.senderAccountId) !== String(account.id) : false;
+                  const amountClass = isReceived || (isDeposit && String(tx.senderAccountId) === String(tx.receiverAccountId)) ? 'tx-amount-credit' : 'tx-amount-debit';
+
+                  return (
+                    <tr key={tx._id}>
+                      <td>
+                        <code style={{ fontSize: '0.8rem', color: 'var(--brand-indigo)', fontWeight: 600 }}>
+                          #{tx._id.slice(-8).toUpperCase()}
+                        </code>
+                      </td>
+                      <td style={{ fontWeight: 700 }}>
+                        <span className={amountClass}>
+                          {formatMinorUnits(tx.amount, tx.currency)}
+                        </span>
+                      </td>
+                      <td><StatusBadge status={tx.status} /></td>
+                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                        {new Date(tx.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

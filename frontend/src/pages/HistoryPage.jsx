@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../store/AuthContext.jsx';
 import transactionService from '../services/transaction.service.js';
 import { formatMinorUnits } from '../utils/currency.js';
 import StatusBadge from '../components/StatusBadge.jsx';
@@ -11,6 +12,7 @@ import {
   ChevronRight,
   ArrowDownLeft,
   ArrowUpRight,
+  PlusCircle,
   Search,
   Filter,
 } from 'lucide-react';
@@ -77,6 +79,8 @@ export function HistoryPage() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const { account } = useAuth();
 
   return (
     <div className="content-wrapper">
@@ -166,54 +170,68 @@ export function HistoryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayed.map((tx) => (
-                    <tr key={tx._id}>
-                      <td>
-                        <div>
-                          <code style={{ fontSize: '0.8rem', color: 'var(--brand-indigo)', fontWeight: 600 }}>
-                            #{tx._id.slice(-10).toUpperCase()}
-                          </code>
-                          {tx.description && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
-                              {tx.description}
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                            fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)',
-                          }}
-                        >
-                          <ArrowUpRight size={15} color="var(--color-error)" /> Sent
-                        </span>
-                      </td>
-                      <td>
-                        <span className="tx-amount-debit">
-                          {formatMinorUnits(tx.amount, tx.currency)}
-                        </span>
-                      </td>
-                      <td><StatusBadge status={tx.status} /></td>
-                      <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-                        {new Date(tx.createdAt).toLocaleString([], {
-                          month: 'short', day: 'numeric', year: 'numeric',
-                          hour: '2-digit', minute: '2-digit',
-                        })}
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        <button
-                          onClick={() => handleOpenLedger(tx)}
-                          className="btn btn-secondary btn-sm"
-                          title="View double-entry postings"
-                          aria-label="View double-entry postings"
-                        >
-                          <Eye size={14} /> Entries
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {displayed.map((tx) => {
+                    const isDeposit = String(tx.senderAccountId) === String(tx.receiverAccountId);
+                    const isReceived = account?.id ? String(tx.receiverAccountId) === String(account.id) && !isDeposit : false;
+                    const typeLabel = isDeposit ? 'Deposit' : isReceived ? 'Received' : 'Sent';
+                    const amountClass = isDeposit || isReceived ? 'tx-amount-credit' : 'tx-amount-debit';
+
+                    return (
+                      <tr key={tx._id}>
+                        <td>
+                          <div>
+                            <code style={{ fontSize: '0.8rem', color: 'var(--brand-indigo)', fontWeight: 600 }}>
+                              #{tx._id.slice(-10).toUpperCase()}
+                            </code>
+                            {tx.description && (
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+                                {tx.description}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                              fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)',
+                            }}
+                          >
+                            {isDeposit ? (
+                              <PlusCircle size={15} color="var(--brand-indigo)" />
+                            ) : isReceived ? (
+                              <ArrowDownLeft size={15} color="var(--color-success)" />
+                            ) : (
+                              <ArrowUpRight size={15} color="var(--color-error)" />
+                            )}
+                            {typeLabel}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={amountClass}>
+                            {formatMinorUnits(tx.amount, tx.currency)}
+                          </span>
+                        </td>
+                        <td><StatusBadge status={tx.status} /></td>
+                        <td style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                          {new Date(tx.createdAt).toLocaleString([], {
+                            month: 'short', day: 'numeric', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                          })}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            onClick={() => handleOpenLedger(tx)}
+                            className="btn btn-secondary btn-sm"
+                            title="View double-entry postings"
+                            aria-label="View double-entry postings"
+                          >
+                            <Eye size={14} /> Entries
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

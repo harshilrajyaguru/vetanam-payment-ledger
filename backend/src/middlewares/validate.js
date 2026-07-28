@@ -12,8 +12,9 @@ export function validate(schema) {
         field: e.path.join('.'),
         message: e.message,
       }));
+      const primaryMessage = issues.map((i) => i.message).join(' • ');
       return next(
-        new AppError('VALIDATION_ERROR', 'Request validation failed', 400, {
+        new AppError('VALIDATION_ERROR', primaryMessage || 'Request validation failed', 400, {
           issues,
         }),
       );

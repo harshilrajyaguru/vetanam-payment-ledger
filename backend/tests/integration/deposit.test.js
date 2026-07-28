@@ -85,4 +85,42 @@ describe('Deposit API & Double-Entry Ledger Integration', () => {
     expect(ledgerEntries[0].amount).toBe(500000);
     expect(ledgerEntries[0].balanceAfter).toBe(500000);
   });
+
+  it('rejects single deposit exceeding ₹10,000 (1,000,000 minor units)', async () => {
+    await request(app).post('/api/v1/auth/register').send(userPayload);
+    const loginRes = await request(app).post('/api/v1/auth/login').send(userPayload);
+    const accessToken = loginRes.body.data.accessToken;
+
+    const res = await request(app)
+      .post('/api/v1/accounts/deposit')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ amount: 1000001, description: 'Over limit deposit' });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toContain('Maximum deposit per transaction is ₹10,000.');
+  });
+
+  it('rejects cumulative deposits exceeding ₹50,000 (5,000,000 minor units)', async () => {
+    await request(app).post('/api/v1/auth/register').send(userPayload);
+    const loginRes = await request(app).post('/api/v1/auth/login').send(userPayload);
+    const accessToken = loginRes.body.data.accessToken;
+
+    // Deposit 5 times ₹10,000 (1,000,000 minor units) = ₹50,000
+    for (let i = 0; i < 5; i++) {
+      const dep = await request(app)
+        .post('/api/v1/accounts/deposit')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ amount: 1000000, description: `Deposit ${i + 1}` });
+      expect(dep.status).toBe(200);
+    }
+
+    // Attempt 6th deposit of ₹1 (100 minor units) -> should be rejected
+    const failRes = await request(app)
+      .post('/api/v1/accounts/deposit')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ amount: 100, description: 'Exceeding total limit' });
+
+    expect(failRes.status).toBe(400);
+    expect(failRes.body.error.message).toContain('Maximum account funding limit of ₹50,000 reached.');
+  });
 });

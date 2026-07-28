@@ -37,6 +37,13 @@ export class AccountService {
       throw new AppError('AMOUNT_INVALID', 'Deposit amount must be a positive integer in minor units', 422);
     }
 
+    const MAX_DEPOSIT_SINGLE = 1000000; // ₹10,000 in minor units
+    const MAX_DEPOSIT_CUMULATIVE = 5000000; // ₹50,000 in minor units
+
+    if (amount > MAX_DEPOSIT_SINGLE) {
+      throw new AppError('DEPOSIT_LIMIT_EXCEEDED', 'Maximum deposit per transaction is ₹10,000.', 400);
+    }
+
     const account = await accountRepository.findByUserId(userId);
     if (!account) {
       throw new AppError('ACCOUNT_NOT_FOUND', 'Wallet account not found for user', 404);
@@ -44,6 +51,10 @@ export class AccountService {
 
     if (account.status === 'frozen') {
       throw new AppError('ACCOUNT_FROZEN', 'Cannot deposit to a frozen account', 403);
+    }
+
+    if (account.cachedBalance + amount > MAX_DEPOSIT_CUMULATIVE) {
+      throw new AppError('ACCOUNT_LIMIT_EXCEEDED', 'Maximum account funding limit of ₹50,000 reached.', 400);
     }
 
     const newBalance = account.cachedBalance + amount;

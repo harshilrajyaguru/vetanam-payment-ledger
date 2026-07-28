@@ -54,6 +54,14 @@ export function AddFundsModal({ isOpen, onClose, currentBalance = 0, onDepositSu
       setError('Please enter a valid amount greater than ₹0');
       return;
     }
+    if (minorAmount > 1000000) {
+      setError('Maximum deposit per transaction is ₹10,000.');
+      return;
+    }
+    if (currentBalance + minorAmount > 5000000) {
+      setError('Maximum account funding limit of ₹50,000 reached.');
+      return;
+    }
     setError('');
     setStep(2);
   };
@@ -75,11 +83,18 @@ export function AddFundsModal({ isOpen, onClose, currentBalance = 0, onDepositSu
           await onDepositSuccess(minorAmount);
         }
       } else {
-        setError(res.error?.message || 'Deposit failed');
+        const errObj = res.error;
+        const msg = errObj?.details?.issues?.length
+          ? errObj.details.issues.map((i) => i.message).join(' • ')
+          : errObj?.message || 'Deposit failed';
+        setError(msg);
         setStep(1);
       }
     } catch (err) {
-      const msg = err.response?.data?.error?.message || err.message || 'Deposit failed';
+      const errObj = err.response?.data?.error;
+      const msg = errObj?.details?.issues?.length
+        ? errObj.details.issues.map((i) => i.message).join(' • ')
+        : errObj?.message || err.message || 'Deposit failed';
       setError(msg);
       setIsProcessing(false);
       setStep(1);
