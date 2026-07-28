@@ -14,9 +14,41 @@ export function createApp() {
   app.use(requestId);
   app.use(requestLogger);
   app.use(helmet());
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    'https://vetanam-payment-ledger.vercel.app',
+    'https://vetanam-payment-ledger-2znoanpst-harshil15.vercel.app',
+  ];
+
+  if (process.env.FRONTEND_URL) {
+    process.env.FRONTEND_URL.split(',').forEach((url) => {
+      const trimmed = url.trim();
+      if (trimmed && !allowedOrigins.includes(trimmed)) {
+        allowedOrigins.push(trimmed);
+      }
+    });
+  }
+
+  if (config.cors.origin) {
+    config.cors.origin.split(',').forEach((url) => {
+      const trimmed = url.trim();
+      if (trimmed && !allowedOrigins.includes(trimmed)) {
+        allowedOrigins.push(trimmed);
+      }
+    });
+  }
+
   app.use(
     cors({
-      origin: config.cors.origin,
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
     }),
   );
