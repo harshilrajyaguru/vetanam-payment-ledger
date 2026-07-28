@@ -33,6 +33,20 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     fetchAccount();
+
+    // Re-fetch on window focus (tab switching)
+    const handleFocus = () => fetchAccount();
+    window.addEventListener('focus', handleFocus);
+
+    // Periodic polling every 10 seconds for real-time balance & state sync
+    const interval = setInterval(() => {
+      fetchAccount();
+    }, 10000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
   }, [fetchAccount]);
 
   const login = async (credentials, passwordArg) => {

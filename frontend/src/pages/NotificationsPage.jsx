@@ -26,7 +26,21 @@ export function NotificationsPage() {
     }
   }, []);
 
-  useEffect(() => { loadNotifications(page); }, [loadNotifications, page]);
+  useEffect(() => {
+    loadNotifications(page);
+
+    const handleFocus = () => loadNotifications(page);
+    window.addEventListener('focus', handleFocus);
+
+    const interval = setInterval(() => {
+      loadNotifications(page);
+    }, 10000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
+  }, [loadNotifications, page]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

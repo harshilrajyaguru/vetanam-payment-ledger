@@ -71,7 +71,24 @@ export function DashboardPage() {
     }
   }, []);
 
-  useEffect(() => { loadDashboardData(); }, [loadDashboardData]);
+  useEffect(() => {
+    loadDashboardData();
+
+    const handleFocus = () => {
+      fetchAccount();
+      loadDashboardData();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    const interval = setInterval(() => {
+      loadDashboardData();
+    }, 10000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(interval);
+    };
+  }, [loadDashboardData, fetchAccount, account?.cachedBalance]);
 
   const handleRefresh = async () => {
     await fetchAccount();
