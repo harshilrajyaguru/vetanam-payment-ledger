@@ -36,7 +36,7 @@ const config = {
 
   rateLimit: {
     auth: {
-      max: parseInt(process.env.RATE_LIMIT_AUTH_MAX || '10', 10),
+      max: parseInt(process.env.RATE_LIMIT_AUTH_MAX || '100', 10),
       windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW_MS || '900000', 10),
     },
     transfer: {

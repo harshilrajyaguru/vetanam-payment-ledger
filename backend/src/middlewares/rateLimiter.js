@@ -18,7 +18,9 @@ export function rateLimiter({ max, windowMs, keyPrefix = 'rl' }) {
       return next();
     }
 
-    const identifier = req.user?.id || req.ip || 'anonymous';
+    const clientIp = req.ip || req.socket?.remoteAddress || '127.0.0.1';
+    const emailTag = req.body?.email ? `:${req.body.email.toLowerCase().trim()}` : '';
+    const identifier = req.user?.id ? req.user.id : `${clientIp}${emailTag}`;
     const key = `${keyPrefix}:${identifier}`;
     const windowSeconds = Math.ceil(windowMs / 1000);
 
@@ -27,9 +29,17 @@ export function rateLimiter({ max, windowMs, keyPrefix = 'rl' }) {
     if (redis && redis.status === 'ready') {
       try {
         const current = await redis.incr(key);
+        
+        // Guarantee expiration: if first increment OR if key somehow lacks a TTL (-1)
         if (current === 1) {
           await redis.expire(key, windowSeconds);
+        } else {
+          const ttl = await redis.ttl(key);
+          if (ttl === -1) {
+            await redis.expire(key, windowSeconds);
+          }
         }
+
         if (current > max) {
           return next(
             new AppError(

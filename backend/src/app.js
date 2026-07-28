@@ -11,6 +11,9 @@ import { setupSwagger } from './config/swagger.js';
 export function createApp() {
   const app = express();
 
+  // Trust first proxy (Render / load balancers) to parse X-Forwarded-For for accurate req.ip
+  app.set('trust proxy', 1);
+
   app.use(requestId);
   app.use(requestLogger);
   app.use(helmet());
