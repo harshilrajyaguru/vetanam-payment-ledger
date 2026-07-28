@@ -16,9 +16,9 @@ Production-grade, highly available monetary transaction and double-entry account
 | **Backend API Service** | [vetanam-payment-ledger.onrender.com](https://vetanam-payment-ledger.onrender.com) | Express REST API deployed on Render |
 | **Swagger API Docs** | [vetanam-payment-ledger.onrender.com/docs](https://vetanam-payment-ledger.onrender.com/docs) | Interactive Swagger UI Documentation |
 
-### 🔑 Demo Account Credentials
-* **Email**: `harshilrajyaguru22@gmail.com`
-* **Password**: `Password123!` *(or register your own account)*
+### 🔑 Demo Account to send money
+Use * **Email**: `harshilrajyaguru22@gmail.com`
+
 
 > 💡 **Try it out**: You can send money to the demo account (`harshilrajyaguru22@gmail.com`) to experience real-time transaction history, ledger updates, and notifications.
 
