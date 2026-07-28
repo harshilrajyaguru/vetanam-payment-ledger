@@ -38,8 +38,13 @@ export class AccountRepository {
    * @param {import('mongoose').ClientSession} [session]
    */
   async updateBalanceWithVersion(id, newBalance, expectedVersion, session = null) {
+    const versionMatch =
+      expectedVersion === 0 || expectedVersion === undefined || expectedVersion === null
+        ? { $in: [0, undefined, null] }
+        : expectedVersion;
+
     const account = await Account.findOneAndUpdate(
-      { _id: id, version: expectedVersion },
+      { _id: id, version: versionMatch },
       {
         $set: { cachedBalance: newBalance },
         $inc: { version: 1 },

@@ -49,28 +49,7 @@ export class AccountService {
     const newBalance = account.cachedBalance + amount;
     const idempotencyKey = `dep_${crypto.randomUUID()}`;
 
-    // Create transaction document (no session)
-    const transaction = await transactionRepository.create({
-      senderAccountId: account._id,
-      receiverAccountId: account._id,
-      amount,
-      status: 'COMPLETED',
-      idempotencyKey,
-      description,
-    });
-
-    // Create ledger credit entry (no session)
-    const createdEntries = await ledgerEntryRepository.createMany([
-      {
-        transactionId: transaction._id,
-        accountId: account._id,
-        type: 'CREDIT',
-        amount,
-        balanceAfter: newBalance,
-      },
-    ]);
-
-    // Update account balance with optimistic version locking (no session)
+    // 1. Update account balance FIRST with optimistic version locking
     const updatedAccount = await accountRepository.updateBalanceWithVersion(
       account._id,
       newBalance,
@@ -85,7 +64,37 @@ export class AccountService {
       );
     }
 
-    // Record audit log (non-blocking)
+    // 2. Create transaction document with COMPLETED status
+    const transaction = await transactionRepository.create({
+      senderAccountId: account._id,
+      receiverAccountId: account._id,
+      amount,
+      status: 'COMPLETED',
+      idempotencyKey,
+      description,
+    });
+
+    // 3. Create ledger credit entry
+    const createdEntries = await ledgerEntryRepository.createMany([
+      {
+        transactionId: transaction._id,
+        accountId: account._id,
+        type: 'CREDIT',
+        amount,
+        balanceAfter: newBalance,
+      },
+    ]);
+
+    // 4. Create notification for deposit
+    const { default: notificationRepository } = await import('../repositories/notification.repository.js');
+    await notificationRepository.create({
+      userId,
+      transactionId: transaction._id,
+      type: 'ACCOUNT_DEPOSIT',
+      read: false,
+    }).catch(() => {});
+
+    // 5. Record audit log
     try {
       await auditLogRepository.create({
         actorId: userId,

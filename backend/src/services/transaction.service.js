@@ -269,7 +269,17 @@ export class TransactionService {
     // Save final snapshot in Idempotency Key record
     await idempotencyKeyRepository.updateStatusAndSnapshot(idempotencyKey, 'COMPLETED', responseSnapshot);
 
-    // 8. Non-blocking Asynchronous Side Effects
+    // 8. Non-blocking Asynchronous Side Effects & Direct Notification Fallback
+    const { default: notificationRepository } = await import('../repositories/notification.repository.js');
+    
+    // Create receiver notification directly to guarantee persistence regardless of worker state
+    await notificationRepository.create({
+      userId: receiverAccount.userId,
+      transactionId: pendingTransaction._id,
+      type: 'TRANSFER_RECEIVED',
+      read: false,
+    }).catch(() => {});
+
     enqueueNotificationJob({
       userId: receiverAccount.userId,
       transactionId: pendingTransaction._id,

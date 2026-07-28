@@ -16,7 +16,14 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: {
-        values: ['TXN_COMPLETED', 'TXN_FAILED', 'TXN_FLAGGED'],
+        values: [
+          'TXN_COMPLETED',
+          'TXN_FAILED',
+          'TXN_FLAGGED',
+          'TRANSFER_RECEIVED',
+          'TRANSACTION_SUCCESS',
+          'ACCOUNT_DEPOSIT',
+        ],
         message: 'Invalid notification type',
       },
       required: [true, 'Notification type is required'],
