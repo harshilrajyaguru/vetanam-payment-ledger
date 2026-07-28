@@ -1,11 +1,20 @@
 import axios from 'axios';
 
-let rawBaseURL = import.meta.env.VITE_API_BASE_URL || 'https://vetanam-payment-ledger.onrender.com';
-rawBaseURL = rawBaseURL.replace(/\/+$/, '');
-const API_BASE_URL = rawBaseURL.endsWith('/api/v1') ? rawBaseURL.slice(0, -7) : rawBaseURL;
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  const fallbackUrl = 'https://vetanam-payment-ledger.onrender.com/api/v1';
+  let url = envUrl && envUrl.trim() ? envUrl.trim() : fallbackUrl;
+  url = url.replace(/\/+$/, '');
+  if (url.endsWith('/api/v1')) {
+    return url;
+  }
+  return `${url}/api/v1`;
+};
+
+const baseURL = getBaseURL();
 
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -24,7 +33,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Check if error is 401 and request has not already retried, and is not the refresh request itself
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -45,7 +53,6 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
         } catch (refreshError) {
-          // Token refresh failed -> clear session
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           window.location.href = '/login';
