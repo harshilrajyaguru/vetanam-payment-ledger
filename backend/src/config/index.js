@@ -66,6 +66,12 @@ const config = {
     concurrency: parseInt(process.env.WORKER_CONCURRENCY || '5', 10),
     reconciliationCron: process.env.RECONCILIATION_CRON || '0 */6 * * *',
   },
+
+  keepAlive: {
+    enabled: process.env.KEEP_ALIVE_ENABLED === 'true' || !!process.env.RENDER_EXTERNAL_URL || !!process.env.PING_URL,
+    url: process.env.PING_URL || process.env.RENDER_EXTERNAL_URL || '',
+    intervalMs: parseInt(process.env.PING_INTERVAL_MS || '600000', 10),
+  },
 };
 
 export default config;

@@ -2,6 +2,7 @@ import config from './config/index.js';
 import { createApp } from './app.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
 import { connectRedis, disconnectRedis } from './config/redis.js';
+import { startKeepAlive, stopKeepAlive } from './utils/keepAlive.js';
 
 process.on('uncaughtException', (err) => {
   console.error('[Process] Uncaught Exception:', err);
@@ -28,10 +29,12 @@ async function startServer() {
 
   const server = app.listen(config.port, () => {
     console.log(`API server running on port ${config.port} [${config.env}]`);
+    startKeepAlive();
   });
 
   async function shutdown(signal) {
     console.log(`Received ${signal}. Shutting down gracefully...`);
+    stopKeepAlive();
     server.close(async () => {
       await disconnectDatabase();
       await disconnectRedis();

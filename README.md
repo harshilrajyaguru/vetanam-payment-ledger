@@ -267,7 +267,7 @@ The backend exposes standardized REST API endpoints for authentication, account 
 
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Public | Infrastructure health check (MongoDB & Redis ping status) |
+| `GET` | `/health` | Public | Infrastructure health check (MongoDB & Redis ping status; used for periodic service availability checks to keep deployed instances active) |
 | `GET` | `/docs` | Public | Interactive Swagger API documentation |
 | `POST` | `/api/v1/auth/register` | Public | Register new user & initialize wallet account |
 | `POST` | `/api/v1/auth/login` | Public | Authenticate credentials & return Access/Refresh JWT pair |
@@ -285,6 +285,8 @@ The backend exposes standardized REST API endpoints for authentication, account 
 | `GET` | `/api/v1/admin/transactions` | Admin | Query global transactions with status/date filters |
 | `PATCH` | `/api/v1/admin/transactions/:id/review` | Admin | Review FLAGGED transaction (Approve/Reject) |
 | `GET` | `/api/v1/admin/audit-logs` | Admin | Query compliance audit log trail |
+
+*Note: The `/health` endpoint is used for periodic service availability checks and keep-alive pings to ensure deployed backend instances remain active.*
 
 Interactive OpenAPI documentation is generated and served at `/docs`.
 
